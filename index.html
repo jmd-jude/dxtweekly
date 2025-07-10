@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DXT Weekly: The Desktop Extensions Newsletter</title>
+  <meta name="description" content="DXT Weekly is your go-to source for discovering the latest Desktop Extensions for AI applications like Claude. Weekly curated picks of the best DXTs.">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="shortcut icon" href="/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      color: #666;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #667eea;
+    }
+
+    .divider {
+      color: #ccc;
+    }
+
+    /* Main Content */
+    main {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 4rem;
+      padding: 4rem 0;
+      min-height: calc(100vh - 80px);
+      align-items: center;
+    }
+
+    .content {
+      color: white;
+    }
+
+    .title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, #fff, #e0e7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .description {
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      opacity: 0.8;
+      max-width: 500px;
+    }
+
+    /* Subscribe Form */
+    .subscribe-form {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .email-input-group {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1rem;
+    }
+
+    .email-input {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 8px 0 0 8px;
+      font-size: 1rem;
+      background: white;
+      color: #333;
+    }
+
+    .email-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+
+    .subscribe-btn {
+      padding: 1rem 2rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 0 8px 8px 0;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .subscribe-btn:hover {
+      background: #5a67d8;
+    }
+
+    .form-note {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      text-align: center;
+    }
+
+    .stats {
+      display: flex;
+      gap: 2rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* Device Mockup */
+    .device-preview {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .device {
+      width: 300px;
+      height: 600px;
+      background: #1a1a1a;
+      border-radius: 30px;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .device::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: #333;
+      border-radius: 2px;
+    }
+
+    .device::after {
+      content: '';
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      border: 2px solid #333;
+      border-radius: 50%;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .newsletter-preview {
+      padding: 20px;
+      font-size: 12px;
+      line-height: 1.4;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .newsletter-preview h1 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #667eea;
+    }
+
+    .newsletter-preview h3 {
+      font-size: 14px;
+      margin: 15px 0 5px 0;
+      color: #333;
+    }
+
+    .newsletter-preview p {
+      margin-bottom: 10px;
+      color: #666;
+    }
+
+    .newsletter-preview em {
+      color: #888;
+      font-size: 11px;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 4rem;
+    }
+
+    footer p {
+      opacity: 0.8;
+      margin-bottom: 0.5rem;
+    }
+
+    footer a {
+      color: white;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        text-align: center;
+      }
+
+      .title {
+        font-size: 2.5rem;
+      }
+
+      .device {
+        width: 250px;
+        height: 500px;
+      }
+
+      .email-input-group {
+        flex-direction: column;
+      }
+
+      .email-input, .subscribe-btn {
+        border-radius: 8px;
+      }
+
+      .stats {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <a href="/" class="logo">DXT Weekly</a>
+        <div class="nav-links">
+          <a href="#archives">Archives</a>
+          <span class="divider">|</span>
+          <a href="#latest">Latest</a>
+          <span class="divider">|</span>
+          <a href="https://dxtweekly.substack.com" target="_blank">Subscribe</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="content">
+      <h1 class="title">DXT Weekly</h1>
+      <h2 class="subtitle">The Desktop Extensions Newsletter</h2>
+      <p class="description">
+        Your go-to source for discovering the latest Desktop Extensions for AI applications like Claude. 
+        Weekly curated picks of the most innovative DXTs that are transforming how we work with AI.
+      </p>
+
+      <div class="subscribe-form">
+        <div class="email-input-group">
+          <input type="email" class="email-input" placeholder="Enter your email address" required>
+          <button type="submit" class="subscribe-btn">Subscribe</button>
+        </div>
+        <p class="form-note">Join developers and AI enthusiasts discovering the best DXTs every week</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number">5+</div>
+          <div class="stat-label">DXTs Featured</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">1</div>
+          <div class="stat-label">Issues Published</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">Weekly</div>
+          <div class="stat-label">Delivery</div>
+        </div>
+      </div>
+
+      <p style="opacity: 0.8;">
+        Check out <a href="#" style="color: white; text-decoration: underline;">our latest issue</a> for a preview.
+      </p>
+    </div>
+
+    <div class="device-preview">
+      <div class="device">
+        <div class="screen">
+          <div class="newsletter-preview">
+            <h1>DXT Weekly #1</h1>
+            <em>July 10, 2025</em>
+            
+            <p>Welcome to the inaugural issue of DXT Weekly, your go-to source for discovering the latest Desktop Extensions for AI applications.</p>
+
+            <h3>Turn LinkedIn Into Your AI Research Assistant</h3>
+            <em>by Daniel Sticker</em>
+            <p>This MCP server transforms LinkedIn into a powerful data source for AI assistants, enabling automated extraction of professional profiles...</p>
+
+            <h3>Give Claude Full System Access</h3>
+            <em>by Saeran & Claude</em>
+            <p>This DXT takes a radical approach by giving Claude complete command line access and system control...</p>
+
+            <h3>AI-Powered Video Production</h3>
+            <em>by Hoyt Harness</em>
+            <p>DaVinci MCP Professional bridges the gap between AI assistance and professional video production...</p>
+
+            <h3>Yandex Tracker Integration</h3>
+            <em>by KTS</em>
+            <p>Brings project management capabilities directly into your AI environment...</p>
+
+            <h3>GWI Consumer Intelligence</h3>
+            <em>by Giorgos Vasileiou</em>
+            <p>Connects Claude directly to GWI's consumer behavior data platform...</p>
+
+            <p><strong>What's Next</strong></p>
+            <p>The DXT ecosystem is growing rapidly! Got a DXT to share? We'd love to feature it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Published independently • <a href="#">Privacy Policy</a> • <a href="#">Contact</a></p>
+      <p style="font-size: 0.9rem;">DXT Weekly is not affiliated with Anthropic or Claude</p>
+    </div>
+  </footer>
+
+  <script>
+    // Add smooth scrolling and basic interactivity
+    document.querySelector('.subscribe-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      const email = document.querySelector('.email-input').value;
+      if (email) {
+        // For now, just show an alert - you'll replace this with Substack integration
+        alert('Thanks for your interest! Please visit our Substack to subscribe: https://dxtweekly.substack.com');
+        // You can redirect to Substack signup page
+        // window.open('https://dxtweekly.substack.com/subscribe', '_blank');
+      }
+    });
+
+    // Make the newsletter preview scrollable with smooth behavior
+    const preview = document.querySelector('.newsletter-preview');
+    if (preview) {
+      preview.style.scrollBehavior = 'smooth';
+    }
+  </script>
+</body>
+</html>
