@@ -237,33 +237,10 @@
     }
 
     .newsletter-preview {
-      padding: 20px;
-      font-size: 12px;
-      line-height: 1.4;
+      width: 100%;
       height: 100%;
-      overflow-y: auto;
-    }
-
-    .newsletter-preview h1 {
-      font-size: 18px;
-      margin-bottom: 10px;
-      color: #667eea;
-    }
-
-    .newsletter-preview h3 {
-      font-size: 14px;
-      margin: 15px 0 5px 0;
-      color: #333;
-    }
-
-    .newsletter-preview p {
-      margin-bottom: 10px;
-      color: #666;
-    }
-
-    .newsletter-preview em {
-      color: #888;
-      font-size: 11px;
+      border: none;
+      border-radius: 20px;
     }
 
     /* Footer */
@@ -310,6 +287,7 @@
 
       .email-input-group {
         flex-direction: column;
+        gap: 0.5rem;
       }
 
       .email-input, .subscribe-btn {
@@ -348,20 +326,21 @@
       </p>
 
       <div class="subscribe-form">
+        <!-- Clean email input that redirects to Substack -->
         <div class="email-input-group">
-          <input type="email" class="email-input" placeholder="Enter your email address" required>
-          <button type="submit" class="subscribe-btn">Subscribe</button>
+          <input type="email" class="email-input" placeholder="Enter your email address" required id="email-signup">
+          <button type="button" class="subscribe-btn" onclick="redirectToSubstack()">Subscribe</button>
         </div>
         <p class="form-note">Join developers and AI enthusiasts discovering the best DXTs every week</p>
       </div>
 
       <div class="stats">
         <div class="stat">
-          <div class="stat-number">5+</div>
+          <div class="stat-number" id="dxt-count">5+</div>
           <div class="stat-label">DXTs Featured</div>
         </div>
         <div class="stat">
-          <div class="stat-number">1</div>
+          <div class="stat-number" id="issues-count">1</div>
           <div class="stat-label">Issues Published</div>
         </div>
         <div class="stat">
@@ -371,42 +350,14 @@
       </div>
 
       <p style="opacity: 0.8;">
-        Check out <a href="#" style="color: white; text-decoration: underline;">our latest issue</a> for a preview.
+        Check out <a href="./latest.html" target="_blank" style="color: white; text-decoration: underline;">our latest issue</a> for a preview.
       </p>
     </div>
 
     <div class="device-preview">
       <div class="device">
         <div class="screen">
-          <div class="newsletter-preview">
-            <h1>DXT Weekly #1</h1>
-            <em>July 10, 2025</em>
-            
-            <p>Welcome to the inaugural issue of DXT Weekly, your go-to source for discovering the latest Desktop Extensions for AI applications.</p>
-
-            <h3>Turn LinkedIn Into Your AI Research Assistant</h3>
-            <em>by Daniel Sticker</em>
-            <p>This MCP server transforms LinkedIn into a powerful data source for AI assistants, enabling automated extraction of professional profiles...</p>
-
-            <h3>Give Claude Full System Access</h3>
-            <em>by Saeran & Claude</em>
-            <p>This DXT takes a radical approach by giving Claude complete command line access and system control...</p>
-
-            <h3>AI-Powered Video Production</h3>
-            <em>by Hoyt Harness</em>
-            <p>DaVinci MCP Professional bridges the gap between AI assistance and professional video production...</p>
-
-            <h3>Yandex Tracker Integration</h3>
-            <em>by KTS</em>
-            <p>Brings project management capabilities directly into your AI environment...</p>
-
-            <h3>GWI Consumer Intelligence</h3>
-            <em>by Giorgos Vasileiou</em>
-            <p>Connects Claude directly to GWI's consumer behavior data platform...</p>
-
-            <p><strong>What's Next</strong></p>
-            <p>The DXT ecosystem is growing rapidly! Got a DXT to share? We'd love to feature it.</p>
-          </div>
+          <iframe src="./latest.html" class="newsletter-preview" scrolling="yes"></iframe>
         </div>
       </div>
     </div>
@@ -420,16 +371,77 @@
   </footer>
 
   <script>
-    // Add smooth scrolling and basic interactivity
-    document.querySelector('.subscribe-btn').addEventListener('click', function(e) {
-      e.preventDefault();
-      const email = document.querySelector('.email-input').value;
-      if (email) {
-        // For now, just show an alert - you'll replace this with Substack integration
-        alert('Thanks for your interest! Please visit our Substack to subscribe: https://dxtweekly.substack.com');
-        // You can redirect to Substack signup page
-        // window.open('https://dxtweekly.substack.com/subscribe', '_blank');
+    // Function to redirect to Substack with pre-filled email
+    function redirectToSubstack() {
+      const email = document.getElementById('email-signup').value;
+      if (email && email.includes('@')) {
+        // Open Substack signup with pre-filled email
+        window.open(`https://dxtweekly.substack.com/subscribe?email=${encodeURIComponent(email)}`, '_blank');
+      } else if (email) {
+        // If invalid email, just go to Substack
+        window.open('https://dxtweekly.substack.com/subscribe', '_blank');
+      } else {
+        // If no email, go to Substack
+        window.open('https://dxtweekly.substack.com/subscribe', '_blank');
       }
+    }
+
+    // Load newsletter data and update stats
+    function updateStats() {
+      try {
+        // Create a hidden iframe to load newsletter data
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = './latest.html';
+        
+        iframe.onload = function() {
+          try {
+            const newsletterData = iframe.contentWindow.newsletterData;
+            if (newsletterData) {
+              // Update issues count
+              const issuesElement = document.getElementById('issues-count');
+              if (issuesElement) {
+                issuesElement.textContent = newsletterData.issueNumber;
+              }
+              
+              // Update DXT count if available
+              const dxtElement = document.getElementById('dxt-count');
+              if (dxtElement && newsletterData.dxtCount) {
+                dxtElement.textContent = newsletterData.dxtCount + '+';
+              }
+            }
+          } catch (e) {
+            console.log('Could not access newsletter data, using defaults');
+          }
+          
+          // Clean up
+          document.body.removeChild(iframe);
+        };
+        
+        iframe.onerror = function() {
+          console.log('Could not load newsletter data, using defaults');
+          document.body.removeChild(iframe);
+        };
+        
+        document.body.appendChild(iframe);
+      } catch (e) {
+        console.log('Using default stats');
+      }
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('DOMContentLoaded', function() {
+      const emailInput = document.getElementById('email-signup');
+      if (emailInput) {
+        emailInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            redirectToSubstack();
+          }
+        });
+      }
+      
+      // Update stats from newsletter data
+      updateStats();
     });
 
     // Make the newsletter preview scrollable with smooth behavior

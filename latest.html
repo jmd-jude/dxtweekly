@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      padding: 15px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #333;
+      background: white;
+    }
+    
+    .issue-header {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .issue-title {
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: #667eea;
+      font-weight: 700;
+    }
+    
+    .issue-date {
+      color: #888;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+    
+    .dxt-item {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .dxt-title {
+      font-size: 13px;
+      margin-bottom: 2px;
+      color: #333;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    
+    .dxt-author {
+      color: #888;
+      font-size: 10px;
+      margin-bottom: 4px;
+      font-style: italic;
+    }
+    
+    .dxt-description {
+      color: #666;
+      font-size: 11px;
+      line-height: 1.3;
+    }
+    
+    .footer-note {
+      margin-top: 15px;
+      font-size: 11px;
+      color: #888;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // 🎯 EASY UPDATE SECTION - Just change these values for each new issue!
+    window.newsletterData = {
+      issueNumber: 1,
+      date: "July 9, 2025",
+      dxtCount: 5,
+      dxts: [
+        {
+          title: "Turn LinkedIn Into Your AI Research Assistant",
+          author: "Daniel Sticker",
+          description: "This MCP server transforms LinkedIn into a powerful data source for AI assistants..."
+        },
+        {
+          title: "Give Claude Full System Access",
+          author: "Saeran & Claude", 
+          description: "This DXT takes a radical approach by giving Claude complete command line access..."
+        },
+        {
+          title: "AI-Powered Video Production with DaVinci Resolve",
+          author: "Hoyt Harness",
+          description: "DaVinci MCP Professional bridges the gap between AI assistance and video production..."
+        },
+        {
+          title: "Seamless Yandex Tracker Integration",
+          author: "KTS",
+          description: "Brings project management capabilities directly into your AI environment..."
+        },
+        {
+          title: "GWI Consumer Intelligence Platform Access",
+          author: "Giorgos Vasileiou",
+          description: "Connects Claude directly to GWI's consumer behavior data platform..."
+        }
+      ]
+    };
+  </script>
+
+  <div class="issue-header">
+    <div class="issue-title">DXT Weekly #<span id="issue-num"></span></div>
+    <div class="issue-date" id="issue-date"></div>
+  </div>
+
+  <div id="dxt-list"></div>
+
+  <div class="footer-note">
+    <strong>What's Next</strong><br>
+    The DXT ecosystem is growing rapidly! Got a DXT to share? We'd love to feature it.
+  </div>
+
+  <script>
+    // Auto-populate the preview
+    const data = window.newsletterData;
+    document.getElementById('issue-num').textContent = data.issueNumber;
+    document.getElementById('issue-date').textContent = data.date;
+    
+    const dxtList = document.getElementById('dxt-list');
+    data.dxts.forEach(dxt => {
+      const dxtEl = document.createElement('div');
+      dxtEl.className = 'dxt-item';
+      dxtEl.innerHTML = `
+        <div class="dxt-title">${dxt.title}</div>
+        <div class="dxt-author">by ${dxt.author}</div>
+        <div class="dxt-description">${dxt.description}</div>
+      `;
+      dxtList.appendChild(dxtEl);
+    });
+  </script>
+</body>
+</html>
