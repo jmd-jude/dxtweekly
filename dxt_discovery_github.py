@@ -24,23 +24,20 @@ class DXTDiscovery:
             'mcp server extension'
         ]
         
-        all_repos = set()
-        
         # Get existing repositories to avoid reprocessing
         existing_repos = set()
         try:
-            # Get already processed DXT extensions
+            # Get repos already in the DXT extensions table
             dxt_repos = self.supabase.table('dxt_extensions').select('repo_name').execute()
             existing_repos.update(repo['repo_name'] for repo in dxt_repos.data)
             
-            # Get already checked non-DXT repos
+            # Get repos already checked and found to be non-DXT
             non_dxt_repos = self.supabase.table('non_dxt_repos').select('repo_name').execute()
             existing_repos.update(repo['repo_name'] for repo in non_dxt_repos.data)
-            
-            print(f"Skipping {len(existing_repos)} already processed repositories")
         except Exception as e:
             print(f"Warning: Could not fetch existing repos: {e}")
-            existing_repos = set()
+        
+        all_repos = set()
         
         for query in search_queries:
             print(f"Searching for: {query}")
@@ -114,15 +111,32 @@ class DXTDiscovery:
         
         return None, None
     
-    def extract_dxt_info(self, manifest, repo_info):
+    def get_repo_details(self, repo_full_name):
+        """Get detailed repository information from GitHub API"""
+        url = f"https://api.github.com/repos/{repo_full_name}"
+        response = requests.get(url, headers=self.github_headers)
+        
+        if response.status_code == 200:
+            repo_data = response.json()
+            return {
+                'updated_at': repo_data.get('updated_at'),
+                'stars': repo_data.get('stargazers_count', 0),
+                'url': repo_data.get('html_url', '')
+            }
+        else:
+            print(f"Warning: Could not fetch details for {repo_full_name}")
+            return {'updated_at': None, 'stars': 0, 'url': ''}
+    
+    def extract_dxt_info(self, manifest, repo_full_name):
         """Extract relevant information from manifest and repo"""
-        repo_full_name, repo_url, stars, updated_at = repo_info
+        # Get fresh repo details for accurate timestamps
+        repo_details = self.get_repo_details(repo_full_name)
         
         return {
             'repo_name': repo_full_name,
-            'repo_url': repo_url,
-            'stars': stars,
-            'repo_updated_at': updated_at if updated_at else None,
+            'repo_url': repo_details['url'],
+            'stars': repo_details['stars'],
+            'repo_updated_at': repo_details['updated_at'],
             'discovered_at': datetime.now().isoformat(),
             
             # From manifest
@@ -185,7 +199,7 @@ class DXTDiscovery:
                 print(f"Found DXT manifest at {manifest_path}")
                 
                 # Extract and save data
-                dxt_data = self.extract_dxt_info(manifest, repo_info)
+                dxt_data = self.extract_dxt_info(manifest, repo_full_name)
                 self.save_to_supabase(dxt_data)
                 dxt_count += 1
             else:
