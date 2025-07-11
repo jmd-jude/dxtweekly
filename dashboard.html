@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DXT Weekly Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        
+        .error {
+            color: #e53e3e;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 DXT Weekly Analytics</h1>
+            <p>Real-time insights into the Desktop Extension ecosystem</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-dxts">-</div>
+                <div class="stat-label">Total DXTs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-categories">-</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-authors">-</div>
+                <div class="stat-label">Authors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="highest-starred">-</div>
+                <div class="stat-label">Highest Stars</div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">📈 Category Distribution</div>
+                <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">⭐ Popularity Tiers</div>
+                <canvas id="popularityChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="table-card">
+            <div class="chart-title">🏆 Top Authors</div>
+            <div id="authors-loading" class="loading">Loading author data...</div>
+            <table id="authors-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Author</th>
+                        <th>DXT Count</th>
+                        <th>Avg Stars</th>
+                        <th>Total Stars</th>
+                    </tr>
+                </thead>
+                <tbody id="authors-tbody"></tbody>
+            </table>
+        </div>
+        
+        <div class="table-card">
+            <div class="chart-title">🆕 Recent Discoveries</div>
+            <div id="recent-loading" class="loading">Loading recent discoveries...</div>
+            <table id="recent-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Stars</th>
+                        <th>Author</th>
+                        <th>Discovered</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-tbody"></tbody>
+            </table>
+        </div>
+        
+        <div class="last-updated">
+            Last updated: <span id="last-updated-time">-</span>
+        </div>
+    </div>
+    
+    <button class="refresh-btn" onclick="loadAllData()">🔄 Refresh</button>
+    
+    <script>
+        // 🔧 CONFIGURATION - Update these with your Supabase details
+        const SUPABASE_URL = 'https://timvfmckzbffjpylojfr.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpbXZmbWNremJmZmpweWxvamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwOTQzNzYsImV4cCI6MjA2NzY3MDM3Nn0.iHZLsfs72_n1_9z4tEYy_SS0Om-rxKgAvh_R6JRoXZU';
+        
+        // Initialize charts
+        let categoryChart, popularityChart;
+        
+        async function fetchSupabaseView(viewName, params = '') {
+            try {
+                const url = `${SUPABASE_URL}/rest/v1/${viewName}${params}`;
+                console.log(`Fetching: ${url}`);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log(`${viewName} response status:`, response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`${viewName} error:`, errorText);
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log(`${viewName} data:`, data);
+                return data;
+            } catch (error) {
+                console.error(`Error fetching ${viewName}:`, error);
+                return null;
+            }
+        }
+        
+        async function fetchSupabaseQuery(query) {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/dxt_extensions?${query}`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+        
+        async function loadOverviewStats() {
+            // Get total DXTs
+            const totalData = await fetchSupabaseQuery('select=id');
+            const total_dxts = totalData ? totalData.length : 0;
+            
+            // Get categories
+            const categoryData = await fetchSupabaseQuery('select=category&category=not.is.null');
+            const uniqueCategories = categoryData ? [...new Set(categoryData.map(item => item.category))].length : 0;
+            
+            // Get authors  
+            const authorData = await fetchSupabaseQuery('select=author_name&author_name=not.eq.');
+            const uniqueAuthors = authorData ? [...new Set(authorData.map(item => item.author_name))].length : 0;
+            
+            // Get highest stars
+            const starsData = await fetchSupabaseQuery('select=stars&order=stars.desc&limit=1');
+            const highest_starred = starsData && starsData.length > 0 ? starsData[0].stars : 0;
+            
+            document.getElementById('total-dxts').textContent = total_dxts;
+            document.getElementById('total-categories').textContent = uniqueCategories;
+            document.getElementById('total-authors').textContent = uniqueAuthors;
+            document.getElementById('highest-starred').textContent = highest_starred;
+        }
+        
+        async function loadCategoryChart() {
+            const data = await fetchSupabaseView('dxt_category_stats', '?order=dxt_count.desc&limit=10');
+            
+            if (!data || data.length === 0) {
+                console.log('No data for category chart');
+                return;
+            }
+            
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js not loaded');
+                return;
+            }
+            
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            if (categoryChart) categoryChart.destroy();
+            
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(item => item.category),
+                    datasets: [{
+                        data: data.map(item => item.dxt_count),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#f5576c',
+                            '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
+                            '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        async function loadPopularityChart() {
+            const data = await fetchSupabaseView('dxt_popularity_tiers', '?order=dxt_count.desc');
+            
+            if (!data || data.length === 0) {
+                console.log('No data for popularity chart');
+                return;
+            }
+            
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js not loaded');
+                return;
+            }
+            
+            const ctx = document.getElementById('popularityChart').getContext('2d');
+            
+            if (popularityChart) popularityChart.destroy();
+            
+            popularityChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.popularity_tier),
+                    datasets: [{
+                        label: 'Number of DXTs',
+                        data: data.map(item => item.dxt_count),
+                        backgroundColor: '#667eea',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        async function loadAuthorsTable() {
+            const data = await fetchSupabaseView('dxt_author_stats', '?order=dxt_count.desc&limit=10');
+            
+            const loading = document.getElementById('authors-loading');
+            const table = document.getElementById('authors-table');
+            const tbody = document.getElementById('authors-tbody');
+            
+            if (data && data.length > 0) {
+                tbody.innerHTML = data.map(author => `
+                    <tr>
+                        <td>${author.author_name}</td>
+                        <td>${author.dxt_count}</td>
+                        <td>${author.avg_stars}</td>
+                        <td>${author.total_stars}</td>
+                    </tr>
+                `).join('');
+                
+                loading.style.display = 'none';
+                table.style.display = 'table';
+            } else {
+                loading.innerHTML = '<div class="error">Failed to load author data</div>';
+            }
+        }
+        
+        async function loadRecentTable() {
+            const data = await fetchSupabaseView('dxt_recent_discoveries', '?order=discovery_date.desc&limit=10');
+            
+            const loading = document.getElementById('recent-loading');
+            const table = document.getElementById('recent-table');
+            const tbody = document.getElementById('recent-tbody');
+            
+            if (data && data.length > 0) {
+                tbody.innerHTML = data.map(dxt => `
+                    <tr>
+                        <td>${dxt.display_name || dxt.name}</td>
+                        <td>${dxt.category || 'Uncategorized'}</td>
+                        <td>${dxt.stars}</td>
+                        <td>${dxt.author_name || 'Unknown'}</td>
+                        <td>${new Date(dxt.discovery_date).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+                
+                loading.style.display = 'none';
+                table.style.display = 'table';
+            } else {
+                loading.innerHTML = '<div class="error">Failed to load recent discoveries</div>';
+            }
+        }
+        
+        async function loadAllData() {
+            document.getElementById('last-updated-time').textContent = new Date().toLocaleString();
+            
+            await Promise.all([
+                loadOverviewStats(),
+                loadCategoryChart(),
+                loadPopularityChart(),
+                loadAuthorsTable(),
+                loadRecentTable()
+            ]);
+        }
+        
+        // Load data when page loads and Chart.js is ready
+        window.onload = function() {
+            // Add small delay to ensure Chart.js is fully loaded
+            setTimeout(loadAllData, 100);
+        };
+    </script>
+</body>
+</html>

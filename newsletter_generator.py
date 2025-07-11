@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import json
 from anthropic import Anthropic
 
+print("Script starting...")
+
 class ClaudeNewsletterGenerator:
     def __init__(self, supabase_url, supabase_key, anthropic_api_key):
         self.supabase: Client = create_client(supabase_url, supabase_key)
@@ -74,7 +76,7 @@ Output format should be exactly:
 
 [Your narrative and use case content]
 
-[View on GitHub]({repo_url})
+View on GitHub: {repo_url}
 
 ---
 
@@ -107,7 +109,7 @@ Nothing else."""
 
 {description or long_description}
 
-[View on GitHub]({repo_url})
+View on GitHub: {repo_url}
 
 ---"""
     
@@ -198,7 +200,7 @@ The DXT ecosystem is growing rapidly! We're tracking {len(dxts)} extensions and 
 
 **Got a DXT to share?** Drop us a line - we'd love to feature it in next week's issue.
 
-**Want to build your own DXT?** Check out [Anthropic's DXT documentation](https://github.com/anthropics/dxt) to get started.
+**Want to build your own DXT?** Check out Anthropic's DXT documentation: https://github.com/anthropics/dxt to get started.
 
 ---
 
@@ -280,6 +282,27 @@ The DXT ecosystem is growing rapidly! We're tracking {len(dxts)} extensions and 
             preview += f"• **{name}** by {author}\n"
         
         return preview
+    
+    def get_next_issue_number(self):
+        """Get the next issue number by finding the highest existing issue and adding 1"""
+        try:
+            # Get the highest issue number from the database
+            result = self.supabase.table('newsletters').select('issue_number').order('issue_number', desc=True).limit(1).execute()
+            
+            if result.data:
+                # If there are existing issues, increment the highest number
+                next_issue = result.data[0]['issue_number'] + 1
+            else:
+                # If no issues exist, start with issue 1
+                next_issue = 1
+                
+            print(f"Next issue number: {next_issue}")
+            return next_issue
+            
+        except Exception as e:
+            print(f"Error determining next issue number: {e}")
+            # Fallback to issue 1
+            return 1
 
 def main():
     load_dotenv()
@@ -294,11 +317,14 @@ def main():
     
     generator = ClaudeNewsletterGenerator(SUPABASE_URL, SUPABASE_KEY, ANTHROPIC_API_KEY)
     
-    # Generate newsletter
-    print("Generating DXT Weekly with Claude API...")
+    # Get the next issue number dynamically
+    issue_number = generator.get_next_issue_number()
+    
+    # Generate newsletter with the correct issue number
+    print(f"Generating DXT Weekly Issue #{issue_number} with Claude API...")
     print("=" * 60)
     
-    newsletter_content = generator.generate_newsletter_content(issue_number=1)
+    newsletter_content = generator.generate_newsletter_content(issue_number=issue_number)
     print(newsletter_content)
     
     print("\n" + "=" * 60)
@@ -307,11 +333,11 @@ def main():
     # Get DXTs for saving
     dxts = generator.get_dxts_for_newsletter()
     
-    # Save to markdown file
-    markdown_file = generator.save_to_markdown(newsletter_content, issue_number=1)
+    # Save to markdown file with correct issue number
+    markdown_file = generator.save_to_markdown(newsletter_content, issue_number=issue_number)
     
-    # Save to Supabase
-    newsletter_id = generator.save_to_supabase_newsletters(newsletter_content, dxts, issue_number=1)
+    # Save to Supabase with correct issue number
+    newsletter_id = generator.save_to_supabase_newsletters(newsletter_content, dxts, issue_number=issue_number)
     
     print(f"\nNewsletter saved to:")
     if markdown_file:
@@ -331,18 +357,18 @@ def main():
         generator.mark_as_featured(dxt_ids)
         print("DXTs marked as featured!")
         
-        # Update newsletter status to published
+        # Update newsletter status to published with correct issue number
         try:
             generator.supabase.table('newsletters').update({
                 'status': 'published',
                 'published_at': datetime.now().isoformat()
-            }).eq('issue_number', 1).execute()
+            }).eq('issue_number', issue_number).execute()
             print("Newsletter status updated to 'published'")
         except Exception as e:
             print(f"Error updating newsletter status: {e}")
         
         # Show preview of next issue
-        print("\n" + generator.preview_next_issue())
+        print("\n" + generator.preview_next_issue(issue_number + 1))
     else:
         print("DXTs not marked as featured - you can generate this issue again later")
 

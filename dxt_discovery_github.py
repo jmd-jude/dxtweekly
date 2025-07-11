@@ -21,7 +21,14 @@ class DXTDiscovery:
             'manifest.json dxt extension',
             'anthropic dxt',
             'filename:manifest.json "dxt_version"',
-            'mcp server extension'
+            'mcp server extension',
+            'manifest.json "claude desktop"',
+            'manifest.json ".dxt"',
+            'filename:manifest.json "claude desktop"',
+            'manifest.json MCP "desktop extension"',
+            '".dxt file" manifest.json',
+            '"desktop extension" manifest.json',
+            'releases ".dxt" manifest.json'
         ]
         
         # Get existing repositories to avoid reprocessing
@@ -101,8 +108,8 @@ class DXTDiscovery:
                     content = base64.b64decode(file_data['content']).decode('utf-8')
                     try:
                         manifest = json.loads(content)
-                        # Check if it's actually a DXT manifest
-                        if 'dxt_version' in manifest:
+                        # Use the improved validation instead of just checking dxt_version
+                        if self.is_valid_dxt(manifest):
                             return manifest, path
                     except json.JSONDecodeError:
                         continue
@@ -110,7 +117,42 @@ class DXTDiscovery:
             time.sleep(0.5)  # Small delay to be nice to GitHub API
         
         return None, None
-    
+
+    def is_valid_dxt(self, manifest):
+        """Validate this is actually a DXT, not just any MCP server"""
+        try:
+            # Look for DXT-specific indicators
+            dxt_indicators = [
+                'dxt_version' in manifest,
+                'desktop' in manifest.get('description', '').lower(),
+                'extension' in manifest.get('description', '').lower(),
+                'claude desktop' in manifest.get('description', '').lower(),
+                '.dxt' in str(manifest).lower(),
+            ]
+            
+            # Must be an MCP server with DXT packaging indicators
+            has_server_config = (
+                manifest.get('server') or 
+                manifest.get('tools') or  # Some manifests just have tools
+                'mcp' in manifest.get('description', '').lower()
+            )
+
+            has_meaningful_content = (
+                manifest.get('name') and 
+                manifest.get('description') and
+                len(manifest.get('description', '')) > 20  # Ensure substantial description
+            )
+            
+            return (
+                has_server_config and       # Has MCP server indicators
+                any(dxt_indicators) and     # Has DXT-specific indicators
+                has_meaningful_content      # Has meaningful content
+            )
+        
+        except Exception as e:
+            print(f"Error validating manifest: {e}")
+            return False
+        
     def get_repo_details(self, repo_full_name):
         """Get detailed repository information from GitHub API"""
         url = f"https://api.github.com/repos/{repo_full_name}"
