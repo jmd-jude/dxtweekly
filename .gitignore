@@ -13,6 +13,10 @@ env/
 notes.txt
 notes.md
 
+# Newsletters
+newsletters/
+/newsletters
+
 # Python cache files
 __pycache__/
 *.pyc
