@@ -52,7 +52,7 @@ class ClaudeNewsletterGenerator:
         # Create prompt for Claude
         prompt = f"""You're writing for DXT Weekly, a newsletter about Desktop Extensions (DXTs) for AI applications like Claude. Your audience is developers, productivity enthusiasts, and AI power users.
 
-Write a compelling newsletter entry for this DXT:
+Write an engaging newsletter entry for this DXT:
 
 **Name:** {name}
 **Author:** {author}
@@ -67,10 +67,10 @@ Write a compelling newsletter entry for this DXT:
 
 Please write:
 1. An engaging headline (different from the repo name, focused on what it does)
-2. A 2-3 sentence narrative explaining what this does and why someone would want it
+2. A 2-3 sentence narrative explaining what this does and why someone would want it. If the project has 100+ GitHub stars, mention this as social proof.
 3. A brief use case example ("Good for..." or "Useful when...")
 
-Keep it professional, clear, and focused on practical value. No emojis. Don't mention the technical details like server type unless relevant to the user.
+Keep it professional, authentic, clear, likeable, and focused on practical value. No emojis, no AI/LLM jargon. Don't mention the technical details like server type unless relevant to the user.
 
 IMPORTANT: Output ONLY the newsletter entry content. Do not include any notes, commentary, or explanations about your writing process. Do not add "Note:" sections.
 
@@ -82,7 +82,7 @@ by [Author]
 
 View on GitHub: {repo_url}
 
---
+---
 
 Nothing else."""
 
@@ -90,7 +90,7 @@ Nothing else."""
             response = self.claude.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=500,
-                system="You are a professional newsletter writer. Output only the requested content with no meta-commentary, notes, or explanations about your writing process.",
+                system="You are a professional newsletter writer, writing about MCP and DXT's specifically. Output only the requested content with no meta-commentary, notes, or explanations about your writing process.",
                 messages=[
                     {"role": "user", "content": prompt}
                 ]
@@ -135,7 +135,7 @@ This issue features:
 
 Write a brief, engaging introduction (2-3 paragraphs) that:
 1. Welcomes readers to this issue of DXT Weekly
-2. Sets up excitement for the extensions we're featuring
+2. Sets up interest for the extensions we're featuring
 
 Keep it professional and accessible. No emojis.
 
@@ -145,7 +145,7 @@ IMPORTANT: Output only the introduction text. No notes or commentary about your 
             response = self.claude.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=400,
-                system="You are a professional newsletter writer. Output only the requested content with no meta-commentary or explanations.",
+                system="You are a professional newsletter writer, writing about MCP and DXT's specifically. DXTs are like browser extensions but for AI apps like Claude - they add new capabilities through the Model Context Protocol. Output only the requested content with no meta-commentary or explanations.",
                 messages=[
                     {"role": "user", "content": prompt}
                 ]
@@ -200,9 +200,9 @@ IMPORTANT: Output only the introduction text. No notes or commentary about your 
         # Add footer
         newsletter += f"""## What's Next
 
-The DXT ecosystem is growing rapidly! We're tracking {len(dxts)} extensions and counting.
+The DXT ecosystem is growing rapidly! We're tracking hundreds of extensions already, and counting.
 
-**Got a DXT to share?** Drop us a line - we'd love to feature it in next week's issue.
+**Got a DXT to share?** Drop us a line - we'd love to feature it in a future issue!
 
 **Want to build your own DXT?** Check out Anthropic's DXT documentation: https://github.com/anthropics/dxt to get started.
 
