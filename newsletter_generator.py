@@ -39,6 +39,8 @@ class ClaudeNewsletterGenerator:
         stars = dxt.get('stars', 0)
         tools = dxt.get('tools', [])
         server_type = dxt.get('server_type', '')
+        category = dxt.get('category', 'Uncategorized')
+        category_reasoning = dxt.get('category_reasoning', '')
         
         # Parse tools if it's a JSON string
         if isinstance(tools, str):
@@ -60,25 +62,27 @@ Write a compelling newsletter entry for this DXT:
 **Server Type:** {server_type}
 **GitHub Stars:** {stars}
 **Repository:** {repo_url}
+**Category:** {category}
+**Category Reasoning:** {category_reasoning}
 
 Please write:
 1. An engaging headline (different from the repo name, focused on what it does)
 2. A 2-3 sentence narrative explaining what this does and why someone would want it
-3. A brief use case example ("Perfect for..." or "Ideal when...")
+3. A brief use case example ("Good for..." or "Useful when...")
 
 Keep it professional, clear, and focused on practical value. No emojis. Don't mention the technical details like server type unless relevant to the user.
 
 IMPORTANT: Output ONLY the newsletter entry content. Do not include any notes, commentary, or explanations about your writing process. Do not add "Note:" sections.
 
 Output format should be exactly:
-### [Your Headline]
-*by [Author]*
+**[Your Headline]**
+by [Author]
 
 [Your narrative and use case content]
 
 View on GitHub: {repo_url}
 
----
+--
 
 Nothing else."""
 
@@ -222,7 +226,7 @@ The DXT ecosystem is growing rapidly! We're tracking {len(dxts)} extensions and 
             print(f"Error saving to markdown: {e}")
             return None
     
-    def mark_as_featured(self, dxt_ids, newsletter_date=None):
+    def mark_as_featured(self, dxt_ids, issue_number, newsletter_date=None):
         """Mark DXTs as featured in newsletter"""
         if newsletter_date is None:
             newsletter_date = datetime.now().date().isoformat()
@@ -231,7 +235,8 @@ The DXT ecosystem is growing rapidly! We're tracking {len(dxts)} extensions and 
             try:
                 self.supabase.table('dxt_extensions').update({
                     'featured_in_newsletter': True,
-                    'newsletter_date': newsletter_date
+                    'newsletter_date': newsletter_date,
+                    'featured_in_issue': issue_number
                 }).eq('id', dxt_id).execute()
             except Exception as e:
                 print(f"Error marking DXT {dxt_id} as featured: {e}")
@@ -354,7 +359,7 @@ def main():
     response = input("\nMark these DXTs as featured? (y/n): ").lower()
     if response == 'y':
         dxt_ids = [dxt['id'] for dxt in dxts]
-        generator.mark_as_featured(dxt_ids)
+        generator.mark_as_featured(dxt_ids, issue_number)
         print("DXTs marked as featured!")
         
         # Update newsletter status to published with correct issue number
