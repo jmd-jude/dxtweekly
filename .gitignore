@@ -49,3 +49,8 @@ desktop.ini
 # Backup files
 *.bak
 *.backup
+
+# Production Scripts
+dxt_categorizer.py
+dxt_discovery_github.py
+newsletter_generator.py
