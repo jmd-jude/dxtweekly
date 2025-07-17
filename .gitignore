@@ -54,3 +54,6 @@ desktop.ini
 dxt_categorizer.py
 dxt_discovery_github.py
 newsletter_generator.py
+base_config.py
+config_dxtweekly.py
+streamlit_app.py
